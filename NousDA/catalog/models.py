@@ -115,7 +115,7 @@ class SingletonModel(models.Model):
     """
     number = models.IntegerField(help_text="Current value of the atomic integer.")
     date = models.DateTimeField(auto_now=False, null=True, blank = True)
-    prev_quatity = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    prev_quantity = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
 
     def clean(self):
         model = self.__class__

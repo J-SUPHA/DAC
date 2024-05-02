@@ -15,8 +15,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
 
-app.conf.beat_scehdule = {
-    'run_my_sceduled_task_every_12_seconds': {
+app.conf.beat_schedule = {
+    'run_my_sceduled_task_every_60_seconds': {
         'task': 'catalog.tasks.my_scheduled_task',
         'schedule': 60.0,
     }
