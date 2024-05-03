@@ -6,10 +6,10 @@ import uuid
 class Transaction(models.Model):
     transaction_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, help_text='Unique ID for this particular transaction')
     is_in = models.BooleanField(default=True)
-    price = models.DecimalField(max_digits=15, decimal_places=7, null=True, blank=True)
+    price = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     transaction_block = models.IntegerField()
     transaction_date = models.DateTimeField(null=True, blank=True)
-    transaction_amount = models.DecimalField(max_digits=10, decimal_places=7)
+    transaction_amount = models.DecimalField(max_digits=17, decimal_places=9)
 
     
 
@@ -24,7 +24,7 @@ class Transaction(models.Model):
 class FIFOI(models.Model):
     input_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    corrected_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    corrected_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
     
@@ -38,8 +38,8 @@ class FIFOI(models.Model):
 class FIFOR(models.Model):
     output_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    new_price = models.DecimalField(max_digits=15, decimal_places=7, null=True, blank=True)
-    correct_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    new_price = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
+    correct_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
     
@@ -53,7 +53,7 @@ class FIFOR(models.Model):
 class LIFOI(models.Model):
     input_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    corrected_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    corrected_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
     
@@ -67,8 +67,8 @@ class LIFOI(models.Model):
 class LIFOR(models.Model):
     output_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    new_price = models.DecimalField(max_digits=15, decimal_places=7, null=True, blank=True)
-    correct_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    new_price = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
+    correct_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
    
@@ -82,7 +82,7 @@ class LIFOR(models.Model):
 class HIFOI(models.Model):
     input_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    corrected_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    corrected_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
     
@@ -96,8 +96,8 @@ class HIFOI(models.Model):
 class HIFOR(models.Model):
     output_key = models.AutoField(primary_key=True)
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text="Reference to the transaction")
-    new_price = models.DecimalField(max_digits=15, decimal_places=7, null=True, blank=True)
-    correct_amount = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    new_price = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
+    correct_amount = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
     # other fields remain unchanged
 
    
@@ -115,7 +115,7 @@ class SingletonModel(models.Model):
     """
     number = models.IntegerField(help_text="Current value of the atomic integer.")
     date = models.DateTimeField(auto_now=False, null=True, blank = True)
-    prev_quantity = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    prev_quantity = models.DecimalField(max_digits=17, decimal_places=9, null=True, blank=True)
 
     def clean(self):
         model = self.__class__
