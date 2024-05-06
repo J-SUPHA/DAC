@@ -123,6 +123,10 @@ def index(request):
         'lifor_gain_tax': apply_tax(lifor_gain),
         'hifor_gain_tax': apply_tax(hifor_gain),
     }
+    if latest_transaction == 0:
+        transaction_block = 0
+    else:
+        transactions_block = latest_transaction.transaction_block
 
     context = {
         'num_transactions': num_transactions,
