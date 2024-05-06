@@ -124,15 +124,15 @@ def index(request):
         'hifor_gain_tax': apply_tax(hifor_gain),
     }
     if latest_transaction == 0:
-        transaction_block = 0
+        my_transaction_block = 0
     else:
-        transactions_block = latest_transaction.transaction_block
+        my_transaction_block = latest_transaction.transaction_block
 
     context = {
         'num_transactions': num_transactions,
         'num_transactions_in': num_transactions_in,
         'num_transactions_out': num_transactions_out,
-        'latest_transaction': transactions_block,
+        'latest_transaction': my_transaction_block,
         **inventory_sums,
         **gain_sums,
         **gain_taxes,
