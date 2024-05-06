@@ -78,10 +78,14 @@ def calculate_gain_sum(model, amount_field, price_field, price_diff_field='trans
 
 
 def index(request):
-    latest_transaction = Transaction.objects.latest('transaction_block')
-    num_transactions = Transaction.objects.count()
-    num_transactions_in = Transaction.objects.filter(is_in=True).count()
-    num_transactions_out = num_transactions - num_transactions_in
+    try:
+        latest_transaction = Transaction.objects.latest('transaction_block')
+        num_transactions = Transaction.objects.count()
+        num_transactions_in = Transaction.objects.filter(is_in=True).count()
+        num_transactions_out = num_transactions - num_transactions_in
+    except Transaction.DoesNotExist:
+        latest_transaction = None
+    
 
     # Calculate totals using utility functions
     inventory_sums = {
