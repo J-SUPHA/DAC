@@ -1,32 +1,106 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Nous Digital Asset Inventory Counter</h1>
-  <p>
-    The following table shows the current state of the Nous Digital Asset Inventory.
-    The Table also shows the Gain/Loss for each inventory method.
-  </p>
-  <h2>Table</h2>
-  <ul>
-    <li><strong>FIFOI Inventory Value:</strong> {{ fifo }}</li>
-    <li><strong>LIFOI Inventory Value:</strong> {{ lifo }}</li>
-    <li><strong>HIFOI Inventory Value:</strong> {{ hifo }}</li>
-    <li><strong>FIFOR Inventory Value:</strong> {{ fifor }}</li>
-    <li><strong>LIFOR Inventory Value:</strong> {{ lifor }}</li>
-    <li><strong>HIFOR Inventory Value:</strong> {{ hifor}}</li>
-    <li><strong>FIFOI Inventory Tao:</strong> {{ fifo_native }}</li>
-    <li><strong>LIFOI Inventory Tao:</strong> {{ lifo_native }}</li>
-    <li><strong>HIFOI Inventory Tao:</strong> {{ hifo_native }}</li>
-    <li><strong>FIFOR Inventory Tao:</strong> {{ fifor_native }}</li>
-    <li><strong>LIFOR Inventory Tao:</strong> {{ lifor_native }}</li>
-    <li><strong>HIFOR Inventory Tao:</strong> {{ hifor_native }}</li>
+<style>
+  body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 20px;
+  }
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      font-size: 18px;
+      min-width: 400px;
+      width: 80%; 
+  }
+  table tr, table th, table td {
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      text-align: center; /* Center text in table cells */
+  }
+  table th {
+      background-color: #007BFF;
+      color: #ffffff;
+      text-align: left;
+  }
+  table tbody tr {
+      border-bottom: 1px solid #dddddd;
+  }
+  table tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+  }
+  table tbody tr:last-of-type {
+      border-bottom: 2px solid #007BFF;
+  }
+  .btn-primary {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+  }
+  .btn-primary:hover {
+      background-color: #0056b3;
+  }
+</style>
 
-    <li><strong>FIFOR Gain/Loss:</strong> {{ fifor_gain }}</li>
-    <li><strong>LIFOR Gain/Loss:</strong> {{ lifor_gain }}</li>
-    <li><strong>HIFOR Gain/Loss:</strong> {{ hifor_gain }}</li>
-  
-   
+<h1> Digital Asset Inventory Counter</h1>
+<p>The following table shows the current state of a specifed wallet</p>
 
-  </ul>
-  <a href="{% url 'export_excel' %}" class="btn btn-primary">Export to Excel</a>
+<table border="1">
+    <thead>
+        <tr>
+            <th></th>
+            <th>FIFO</th>
+            <th>LIFO</th>
+            <th>HIFO</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Inventory Tao</strong></td>
+            <td>{{ fifo_native }}</td>
+            <td>{{ lifo_native }}</td>
+            <td>{{ hifo_native }}</td>
+        </tr>
+        <tr>
+            <td><strong>Inventory USD</strong></td>
+            <td>{{ fifo }}</td>
+            <td>{{ lifo }}</td>
+            <td>{{ hifo }}</td>
+        </tr>
+        <tr>
+            <td><strong>Used Tao</strong></td>
+            <td>{{ fifor_native }}</td>
+            <td>{{ lifor_native }}</td>
+            <td>{{ hifor_native }}</td>
+        </tr>
+        <tr>
+            <td><strong>Used Tao in Dollars</strong></td>
+            <td>{{ fifor }}</td>
+            <td>{{ lifor }}</td>
+            <td>{{ hifor }}</td>
+        </tr>
+        <tr>
+            <td><strong>Gain/Loss</strong></td>
+            <td>{{ fifor_gain }}</td>
+            <td>{{ lifor_gain }}</td>
+            <td>{{ hifor_gain }}</td>
+        </tr>
+        <tr>
+          <td><strong>Gain/Loss Tax</strong></td>
+          <td>{{ fifor_gain_tax }}</td>
+          <td>{{ lifor_gain_tax }}</td>
+          <td>{{ hifor_gain_tax }}</td>
+      </tr>
+    </tbody>
+</table>
+<a href="{% url 'export_excel' %}" class="btn btn-primary">Export to Excel</a>
+<a href="{% url 'export_csv' %}" class="btn btn-primary">Download CSV</a>
 {% endblock %}
+

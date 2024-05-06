@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import pytz
 from django.conf import settings
 import re
+import os
 
 logger = logging.getLogger('catalog')
 
@@ -19,7 +20,8 @@ logger = logging.getLogger('catalog')
     
 @shared_task(bind=True)
 def my_scheduled_task(self):
-    logger.debug('This is a scheduled task')
+
+    wallet_address = os.getenv('WALLET_ADDRESS', 'default_wallet_address_if_not_set')
     try:
         finney_subtensor = bittensor.subtensor(network="finney")
         historical_subtensor = bittensor.subtensor(network='archive')
@@ -32,8 +34,8 @@ def my_scheduled_task(self):
             logger.error("Max retries reached. Exiting task.")
             return
     
-    current_block = 2227270
-    wallet_address = "5H6VnWCi8wDV5xfatGtAbjkqiCtGoet7euCQNJTVjkL4LQcM"
+    current_block = 2516947
+    # wallet_address = "5H6VnWCi8wDV5xfatGtAbjkqiCtGoet7euCQNJTVjkL4LQcM"
 
     try:
         singleton_instance = SingletonModel.objects.first()
@@ -123,7 +125,7 @@ def handle_inventory_changes(transaction, amount_to_deduct, price):
 def process_inventory_transaction(inventory_model, correction_model, amount_to_deduct, price, transaction, reverse=False, isPrice=False ):
     # amount to deduct is 299
     if isPrice:
-        existing_inventory = inventory_model.objects.select_related('transaction').order_by('transaction__price')
+        existing_inventory = inventory_model.objects.select_related('transaction').order_by('-transaction__price')
     else:
         existing_inventory = inventory_model.objects.select_related('transaction').order_by('-transaction__transaction_date' if reverse else 'transaction__transaction_date')
     for item in existing_inventory:
@@ -158,7 +160,7 @@ def process_inventory_transaction(inventory_model, correction_model, amount_to_d
                 item.delete()
             else:
                 item.corrected_amount = item.corrected_amount - amount_to_deduct
-                transaction.save(update_fields=['corrected_amount'])
+                item.save(update_fields=['corrected_amount'])
                 correction_model.objects.create(
                     transaction=item.transaction,
                     new_price=price,
