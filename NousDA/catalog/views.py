@@ -14,8 +14,9 @@ def format_decimal(value):
         return value.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
     return value
 def apply_tax(value, tax_rate=0.23):
-   
-    return format_decimal(value * Decimal(tax_rate))
+    if value:
+        return format_decimal(value * Decimal(tax_rate))
+    return value
 
 def calculate_inventory_sum(model, price_field, amount_field_1 ,amount_field_2='transaction__transaction_amount'):
     if amount_field_1 == 'correct_amount':
