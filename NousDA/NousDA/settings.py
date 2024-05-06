@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-y$*k%+zolh&n7uzktmp=(e9cr*pwj@@r3zh^g6z9cz4=pmjlia
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1:8000']
+ALLOWED_HOSTS = ['34.138.121.225']
 
 
 # Application definition
@@ -88,6 +88,17 @@ WSGI_APPLICATION = 'NousDA.wsgi.application'
 #     }
 # }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'wallet',
+        'USER': 'jai',
+        'PASSWORD': os.environ['DB_PASSWORD'], 
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -124,6 +135,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIS_ROST = os.path.join(BASE_DIR, 'static/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
