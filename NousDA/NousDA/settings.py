@@ -27,7 +27,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 9000000  # adjust the number based on your needs
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y$*k%+zolh&n7uzktmp=(e9cr*pwj@@r3zh^g6z9cz4=pmjlia'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

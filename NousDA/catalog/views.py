@@ -10,7 +10,9 @@ import csv
 
 def format_decimal(value):
     # This function will format the decimal value to two decimal places
-    return value.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+    if value:
+        return value.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+    return value
 def apply_tax(value, tax_rate=0.23):
    
     return format_decimal(value * Decimal(tax_rate))
