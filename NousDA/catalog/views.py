@@ -84,9 +84,11 @@ def index(request):
         num_transactions_in = Transaction.objects.filter(is_in=True).count()
         num_transactions_out = num_transactions - num_transactions_in
     except Transaction.DoesNotExist:
-        latest_transaction = None
+        latest_transaction = 0
+        num_transactions = 0
+        num_transactions_in = 0
+        num_transactions_out = 0
     
-
     # Calculate totals using utility functions
     inventory_sums = {
         'fifo': format_decimal(calculate_inventory_sum(FIFOI, "transaction__price", "corrected_amount")),
