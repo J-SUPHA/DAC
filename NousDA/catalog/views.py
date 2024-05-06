@@ -132,7 +132,7 @@ def index(request):
         'num_transactions': num_transactions,
         'num_transactions_in': num_transactions_in,
         'num_transactions_out': num_transactions_out,
-        'latest_transaction': latest_transaction.transaction_block,
+        'latest_transaction': transactions_block,
         **inventory_sums,
         **gain_sums,
         **gain_taxes,
