@@ -40,6 +40,7 @@ frozendict==2.4.2
 frozenlist==1.4.1
 fsspec==2024.3.1
 fuzzywuzzy==0.18.0
+gunicorn==22.0.0
 h11==0.14.0
 html5lib==1.1
 idna==3.7
@@ -72,6 +73,7 @@ peewee==3.17.3
 platformdirs==4.2.1
 pluggy==1.5.0
 prompt-toolkit==3.0.43
+psycopg2-binary==2.9.9
 py==1.11.0
 py-bip39-bindings==0.1.11
 py-ed25519-zebra-bindings==1.0.1
