@@ -42,6 +42,7 @@ ALLOWED_HOSTS = ['35.237.53.200','localhost'] # this si teh allowed 35.237.191.3
 # Application definition
 
 INSTALLED_APPS = [
+    'django_celery_beat',
     'django_celery_results',
     'django.contrib.admin',
     'django.contrib.auth',
