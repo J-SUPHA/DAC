@@ -21,7 +21,7 @@ logger = logging.getLogger('catalog')
 @shared_task(bind=True)
 def my_scheduled_task(self):
 
-    wallet_address = os.getenv('WALLET_ADDRESS', 'default_wallet_address_if_not_set')
+    wallet_address = "5H6VnWCi8wDV5xfatGtAbjkqiCtGoet7euCQNJTVjkL4LQcM"
     try:
         finney_subtensor = bittensor.subtensor(network="finney")
         historical_subtensor = bittensor.subtensor(network='archive')
@@ -34,8 +34,7 @@ def my_scheduled_task(self):
             logger.error("Max retries reached. Exiting task.")
             return
     
-    current_block = 2516947
-    # wallet_address = "5H6VnWCi8wDV5xfatGtAbjkqiCtGoet7euCQNJTVjkL4LQcM"
+    
 
     try:
         singleton_instance = SingletonModel.objects.first()
