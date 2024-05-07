@@ -7,6 +7,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NousDA.settings')
 
 app = Celery('NousDA')
 
+app.conf.task_time_limit = 400  # hard time limit in seconds
+
+app.conf.task_soft_time_limit = 320  # soft time limit in seconds
+
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # - Load configuration from Django settings, the CELERY namespace means all celery-related setting keys should have `CELERY_` as a prefix.
