@@ -18,7 +18,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTET = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/New_York'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 9000000  # adjust the number based on your needs
 
