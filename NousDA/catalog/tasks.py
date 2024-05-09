@@ -54,11 +54,12 @@ def my_scheduled_task(self):
             return
 
     price = 200
-
+    saved_block = prev_block
     if current_block > prev_block:
 
         limit = min(current_block, prev_block + 1200)
         for block in range(prev_block + 1, limit):
+            
 
             try:
                 balance_str = historical_subtensor.get_balance(wallet_address, block=block)
@@ -93,9 +94,9 @@ def my_scheduled_task(self):
 
                 prev_quantity = new_balance
                 prev_date = transaction_date
+                saved_block = block
 
-        singleton_instance.number = current_block
-        logger.debug(f"Updating block to {prev_quantity}")
+        singleton_instance.number = saved_block
         singleton_instance.prev_quantity = prev_quantity
         singleton_instance.date = prev_date
         singleton_instance.save()
