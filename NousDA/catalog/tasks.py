@@ -37,9 +37,6 @@ def my_scheduled_task(self):
         else:
             logger.error("Max retries reached. Exiting task.")
             return
-    
-    
-
     try:
         singleton_instance = SingletonModel.objects.first()
         prev_block = singleton_instance.number
@@ -74,27 +71,32 @@ def my_scheduled_task(self):
             new_balance = parse_balance(balance_str)
 
             transaction_date = prev_date + timedelta(seconds=12)
+            try:
+                with db_transactions.atomic():
 
-            with db_transactions.atomic():
+                    if new_balance != prev_quantity:
 
-                if new_balance != prev_quantity:
+                        new_price = get_price_for_date("TAO22974-USD", transaction_date)
+                        price = new_price if new_price else price
+                        transaction = create_transaction(new_balance, prev_quantity, price, block, transaction_date)
+                        # 0.9444 - 300 = -299.056
+                        # 299.056
+                        amount_to_change = abs(new_balance - prev_quantity)
+                        if new_balance > prev_quantity:  # Increase in assets
+                            add_inventory(transaction, amount_to_change)
+                        else:  # Decrease in assets
+                            handle_inventory_changes(transaction, amount_to_change, price)
 
-
-
-                    new_price = get_price_for_date("TAO22974-USD", transaction_date)
-                    price = new_price if new_price else price
-                    transaction = create_transaction(new_balance, prev_quantity, price, block, transaction_date)
-                    # 0.9444 - 300 = -299.056
-                    # 299.056
-                    amount_to_change = abs(new_balance - prev_quantity)
-                    if new_balance > prev_quantity:  # Increase in assets
-                        add_inventory(transaction, amount_to_change)
-                    else:  # Decrease in assets
-                        handle_inventory_changes(transaction, amount_to_change, price)
-
-                prev_quantity = new_balance
-                prev_date = transaction_date
-                saved_block = block
+                    prev_quantity = new_balance
+                    prev_date = transaction_date
+                    saved_block = block
+            except Exception as e:
+                logger.error(f"An error occurred while processing the transaction: {str(e)}")
+                if self.request.retries < self.max_retries:
+                    raise self.retry(countdown=60)
+                else:
+                    logger.error("Max retries reached. Exiting task.")
+                    return
 
         singleton_instance.number = saved_block
         singleton_instance.prev_quantity = prev_quantity
