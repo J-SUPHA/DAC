@@ -9,7 +9,7 @@ app = Celery('NousDA')
 
 app.conf.task_time_limit = 400  # hard time limit in seconds
 
-app.conf.task_soft_time_limit = 320  # soft time limit in seconds
+
 
 app.conf.task_queue_max_priority = 10  # Adjust based on your max priority level
 
