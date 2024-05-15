@@ -9,7 +9,11 @@ app = Celery('NousDA')
 
 app.conf.task_time_limit = 400  # hard time limit in seconds
 
-app.conf.task_soft_time_limit = 320  # soft time limit in seconds
+
+
+app.conf.task_queue_max_priority = 10  # Adjust based on your max priority level
+
+app.conf.task_default_priority = 5
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
@@ -20,8 +24,14 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'run_my_sceduled_task_every_60_seconds': {
+    'run_my_sceduled_task_every_4_seconds': {
         'task': 'catalog.tasks.my_scheduled_task',
-        'schedule': 60.0,
+        'schedule': 4.0,
+        'options': {'priority': 5}
+    }, 
+    'update_cached_data_every_100_seconds': {
+        'task': 'catalog.tasks.update_cached_data',
+        'schedule': 100.0,
+        'options': {'priority':6 }
     }
 }
