@@ -62,8 +62,7 @@ def my_scheduled_task(self):
 
         limit = min(current_block, prev_block + 1200)
         for block in range(prev_block + 1, limit):
-            
-
+        
             try:
                 balance_str = historical_subtensor.get_balance(wallet_address, block=block)
             except Exception as e:
@@ -267,13 +266,8 @@ def export_inventory_to_excel(priority=0):
 
 @shared_task
 def export_inventory_to_csv(prioirity=0):
-    # Collect data from your models with related transaction details
+    # Collect FIFO data from your models with related transaction details
     fifo_data = FIFOI.objects.select_related('transaction').all()
-    lifo_data = LIFOI.objects.select_related('transaction').all()
-    hifo_data = HIFOI.objects.select_related('transaction').all()
-    fifor_data = FIFOR.objects.select_related('transaction').all()
-    lifor_data = LIFOR.objects.select_related('transaction').all()
-    hifor_data = HIFOR.objects.select_related('transaction').all()
 
     # Prepare data for CSV conversion
     def prepare_data(items):
@@ -293,7 +287,7 @@ def export_inventory_to_csv(prioirity=0):
 
     # Prepare HTTP response object for CSV output
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="inventory_data.csv"'
+    response['Content-Disposition'] = 'attachment; filename="fifo_inventory_data.csv"'
 
     # Create a CSV writer object and write the headers and data
     writer = csv.DictWriter(response, fieldnames=[
@@ -302,10 +296,10 @@ def export_inventory_to_csv(prioirity=0):
     ])
     writer.writeheader()
 
-    for model_data in [fifo_data, lifo_data, hifo_data, fifor_data, lifor_data, hifor_data]:
-        prepared_data = prepare_data(model_data)
-        for data in prepared_data:
-            writer.writerow(data)
+    # Prepare and write FIFO data
+    prepared_fifo_data = prepare_data(fifo_data)
+    for data in prepared_fifo_data:
+        writer.writerow(data)
 
     return response
 
