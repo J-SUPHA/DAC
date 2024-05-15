@@ -19,7 +19,7 @@
   table tr, table th, table td {
       border: 1px solid #ddd;
       padding: 12px 15px;
-      text-align: center; /* Center text in table cells */
+      text-align: center;
   }
   table th {
       background-color: #007BFF;
@@ -50,7 +50,7 @@
 </style>
 
 <h1> Digital Asset Inventory Counter</h1>
-<p>The following table shows the current state of a specifed wallet at block {{ latest_transaction }}</p>
+<p>The following table shows the current state of a specified wallet as of {{ data.date }}</p>
 
 <table border="1">
     <thead>
@@ -64,43 +64,58 @@
     <tbody>
         <tr>
             <td><strong>Inventory Tao</strong></td>
-            <td>{{ fifo_native }}</td>
-            <td>{{ lifo_native }}</td>
-            <td>{{ hifo_native }}</td>
+            <td>{{ data.fifo_native|default:"Loading..." }}</td>
+            <td>{{ data.lifo_native|default:"Loading..." }}</td>
+            <td>{{ data.hifo_native|default:"Loading..." }}</td>
         </tr>
         <tr>
             <td><strong>Inventory USD</strong></td>
-            <td>{{ fifo }}</td>
-            <td>{{ lifo }}</td>
-            <td>{{ hifo }}</td>
+            <td>{{ data.fifo|default:"Loading..." }}</td>
+            <td>{{ data.lifo|default:"Loading..." }}</td>
+            <td>{{ data.hifo|default:"Loading..." }}</td>
         </tr>
         <tr>
             <td><strong>Used Tao</strong></td>
-            <td>{{ fifor_native }}</td>
-            <td>{{ lifor_native }}</td>
-            <td>{{ hifor_native }}</td>
+            <td>{{ data.fifor_native|default:"Loading..." }}</td>
+            <td>{{ data.lifor_native|default:"Loading..." }}</td>
+            <td>{{ data.hifor_native|default:"Loading..." }}</td>
         </tr>
         <tr>
             <td><strong>Used Tao in Dollars</strong></td>
-            <td>{{ fifor }}</td>
-            <td>{{ lifor }}</td>
-            <td>{{ hifor }}</td>
+            <td>{{ data.fifor|default:"Loading..." }}</td>
+            <td>{{ data.lifor|default:"Loading..." }}</td>
+            <td>{{ data.hifor|default:"Loading..." }}</td>
         </tr>
         <tr>
             <td><strong>Gain/Loss</strong></td>
-            <td>{{ fifor_gain }}</td>
-            <td>{{ lifor_gain }}</td>
-            <td>{{ hifor_gain }}</td>
+            <td>{{ data.fifor_gain|default:"Loading..." }}</td>
+            <td>{{ data.lifor_gain|default:"Loading..." }}</td>
+            <td>{{ data.hifor_gain|default:"Loading..." }}</td>
         </tr>
         <tr>
-          <td><strong>Gain/Loss Tax</strong></td>
-          <td>{{ fifor_gain_tax }}</td>
-          <td>{{ lifor_gain_tax }}</td>
-          <td>{{ hifor_gain_tax }}</td>
-      </tr>
+            <td><strong>Gain/Loss Tax</strong></td>
+            <td>{{ data.fifor_gain_tax|default:"Loading..." }}</td>
+            <td>{{ data.lifor_gain_tax|default:"Loading..." }}</td>
+            <td>{{ data.hifor_gain_tax|default:"Loading..." }}</td>
+        </tr>
     </tbody>
 </table>
 <a href="{% url 'export_excel' %}" class="btn btn-primary">Export to Excel</a>
 <a href="{% url 'export_csv' %}" class="btn btn-primary">Download CSV</a>
-{% endblock %}
 
+<script>
+function fetchData() {
+    fetch("{% url 'index' %}")
+        .then(response => response.json())
+        .then(data => {
+            if (Object.keys(data).length !== 0) {
+                location.reload();
+            } else {
+                setTimeout(fetchData, 5000);
+            }
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+fetchData();
+</script>
+{% endblock %}

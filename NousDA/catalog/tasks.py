@@ -1,9 +1,14 @@
 from celery import shared_task
 import bittensor
 import logging
+from django.db.models import Sum, Case, When, F, DecimalField
 from bittensor.subtensor import Balance
+import openpyxl
+import pandas as pd
+import csv
 import yfinance
 from .models import SingletonModel, Transaction, FIFOI, LIFOI, HIFOI, FIFOR, LIFOR, HIFOR
+from decimal import Decimal, ROUND_HALF_UP
 from django.db import transaction as db_transactions
 from django.utils import timezone
 from datetime import timedelta 
@@ -13,10 +18,11 @@ import pytz
 from django.conf import settings
 import re
 import os
-import pandas as pd
+
 from django.http import HttpResponse
-import csv
+
 from django.utils.timezone import localtime
+from django.core.cache import cache
 
 logger = logging.getLogger('catalog')
 
@@ -106,7 +112,7 @@ def my_scheduled_task(self):
 def create_transaction(new_balance, prev_quantity, price, block, transaction_date):
     is_in = new_balance > prev_quantity
     transaction_amount = abs(new_balance - prev_quantity)
-    logger.debug(f"Creating transaction with values: {is_in}, {price}, {block}, {transaction_date}, {transaction_amount}")
+    
     return Transaction.objects.create(
         is_in=is_in,
         price=price,
@@ -302,3 +308,147 @@ def export_inventory_to_csv(prioirity=0):
             writer.writerow(data)
 
     return response
+
+def format_decimal(value):
+    # This function will format the decimal value to two decimal places
+    if value:
+        return value.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+    return value
+def apply_tax(value, tax_rate=0.27, gain_reduction=0.10):
+    if value:
+        if value<0:
+            return format_decimal(value * Decimal(tax_rate) * Decimal(gain_reduction))
+        return format_decimal(value * Decimal(tax_rate))
+    return value
+
+def calculate_inventory_sum(model, price_field, amount_field_1 ,amount_field_2='transaction__transaction_amount'):
+    if amount_field_1 == 'correct_amount':
+        return model.objects.annotate(
+            total_value=Case(
+                When(correct_amount__isnull=False,
+                     then=F(amount_field_1) * F(price_field)),
+                default=F(amount_field_2) * F(price_field),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+    else:
+        return model.objects.annotate(
+            total_value=Case(
+                When(corrected_amount__isnull=False,
+                    then=F(amount_field_1) * F(price_field)),
+                default=F(amount_field_2) * F(price_field),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+
+def calculate_native_inventory_sum(model, amount_field_1):
+    if amount_field_1 == 'correct_amount':
+        return model.objects.annotate(
+            total_value=Case(
+                When(correct_amount__isnull=False,
+                     then=F(amount_field_1)),
+                default=F('transaction__transaction_amount'),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+    else:
+        return model.objects.annotate(
+            total_value=Case(
+                When(corrected_amount__isnull=False,
+                    then=F(amount_field_1)),
+                default=F('transaction__transaction_amount'),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+
+
+def calculate_gain_sum(model, amount_field, price_field, price_diff_field='transaction__price'):
+    if amount_field == 'correct_amount':
+        return model.objects.annotate(
+            total_value=Case(
+                When(correct_amount__isnull=False,
+                     then=F(amount_field) * (F(price_field) - F(price_diff_field))),
+                default=F('transaction__transaction_amount') * (F(price_field) - F(price_diff_field)),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+    else:
+        return model.objects.annotate(
+            total_value=Case(
+                When(corrected_amount__isnull=False,
+                    then=F(amount_field) * (F(price_field) - F(price_diff_field))),
+                default=F('transaction__transaction_amount') * (F(price_field) - F(price_diff_field)),
+                output_field=DecimalField(max_digits=20, decimal_places=7)
+            )
+        ).aggregate(total=Sum('total_value'))['total']
+
+@shared_task
+def update_cached_data():
+    logger.debug("Updating cached data...")
+    print("Continue to get better. Keep challenging yourself. Don't be afraid to succeed.")
+   
+    try:
+        mySingleton = SingletonModel.objects.first()
+        latest_transaction = Transaction.objects.latest('transaction_block')
+        num_transactions = Transaction.objects.count()
+        num_transactions_in = Transaction.objects.filter(is_in=True).count()
+        num_transactions_out = num_transactions - num_transactions_in
+    except Transaction.DoesNotExist:
+        latest_transaction = 0
+        num_transactions = 0
+        num_transactions_in = 0
+        num_transactions_out = 0
+    logger.debug("Fetching latest transaction...")
+
+
+    # Calculate totals using utility functions
+    inventory_sums = {
+        'fifo': format_decimal(calculate_inventory_sum(FIFOI, "transaction__price", "corrected_amount")),
+        'lifo': format_decimal(calculate_inventory_sum(LIFOI, "transaction__price", "corrected_amount")),
+        'hifo': format_decimal(calculate_inventory_sum(HIFOI, "transaction__price", "corrected_amount")),
+        'fifor': format_decimal(calculate_inventory_sum(FIFOR, "new_price","correct_amount")),
+        'lifor': format_decimal(calculate_inventory_sum(LIFOR, "new_price","correct_amount")),
+        'hifor': format_decimal(calculate_inventory_sum(HIFOR, "new_price","correct_amount")),
+        'fifor_native': format_decimal(calculate_native_inventory_sum(FIFOR, 'correct_amount')),
+        'lifor_native': format_decimal(calculate_native_inventory_sum(LIFOR, 'correct_amount')),
+        'hifor_native': format_decimal(calculate_native_inventory_sum(HIFOR, 'correct_amount')),
+        'fifo_native': format_decimal(calculate_native_inventory_sum(FIFOI, 'corrected_amount')),
+        'lifo_native': format_decimal(calculate_native_inventory_sum(LIFOI, 'corrected_amount')),
+        'hifo_native': format_decimal(calculate_native_inventory_sum(HIFOI, 'corrected_amount')),
+    }
+
+    logger.debug("Calculating inventory sums...")
+
+    fifor_gain = format_decimal(calculate_gain_sum(FIFOR,'correct_amount', 'new_price'))
+    lifor_gain = format_decimal(calculate_gain_sum(LIFOR, 'correct_amount','new_price'))
+    hifor_gain = format_decimal(calculate_gain_sum(HIFOR, 'correct_amount','new_price'))
+
+    logger.debug("I am a bad man and I think three steps ahead")
+
+    gain_sums = {
+        'fifor_gain': fifor_gain,
+        'lifor_gain': lifor_gain,
+        'hifor_gain': hifor_gain,
+    }
+    gain_taxes = {
+        'fifor_gain_tax': apply_tax(fifor_gain),
+        'lifor_gain_tax': apply_tax(lifor_gain),
+        'hifor_gain_tax': apply_tax(hifor_gain),
+    }
+    if latest_transaction == 0:
+        my_transaction_block = 0
+    else:
+        my_transaction_block = latest_transaction.transaction_block
+
+    context = {
+        'date': mySingleton.date,
+        'num_transactions': num_transactions,
+        'num_transactions_in': num_transactions_in,
+        'num_transactions_out': num_transactions_out,
+        'latest_transaction': my_transaction_block,
+        **inventory_sums,
+        **gain_sums,
+        **gain_taxes,
+    }
+
+    cache.set('dashboard_data', context, timeout=None)
