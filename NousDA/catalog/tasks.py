@@ -388,7 +388,6 @@ def update_cached_data():
     print("Continue to get better. Keep challenging yourself. Don't be afraid to succeed.")
    
     try:
-        mySingleton = SingletonModel.objects.first()
         latest_transaction = Transaction.objects.latest('transaction_block')
         num_transactions = Transaction.objects.count()
         num_transactions_in = Transaction.objects.filter(is_in=True).count()
@@ -441,7 +440,7 @@ def update_cached_data():
         my_transaction_block = latest_transaction.transaction_block
 
     context = {
-        'date': mySingleton.date,
+        'date': timezone.now(),
         'num_transactions': num_transactions,
         'num_transactions_in': num_transactions_in,
         'num_transactions_out': num_transactions_out,
