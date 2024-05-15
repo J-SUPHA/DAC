@@ -266,40 +266,37 @@ def export_inventory_to_excel(priority=0):
 
 @shared_task
 def export_inventory_to_csv(prioirity=0):
-    # Collect FIFO data from your models with related transaction details
-    fifo_data = FIFOI.objects.select_related('transaction').all()
-
-    # Prepare data for CSV conversion
-    def prepare_data(items):
-        return [
-            {
-                'Input/Output Key': item.pk,
-                'Transaction ID': item.transaction.transaction_id,
-                'Is In': item.transaction.is_in,
-                'Price': item.transaction.price,
-                'Transaction Block': item.transaction.transaction_block,
-                'Transaction Date': localtime(item.transaction.transaction_date).strftime('%Y-%m-%d %H:%M:%S') if item.transaction.transaction_date else None,
-                'Transaction Amount': item.transaction.transaction_amount,
-                'Corrected Amount/Correct Amount': getattr(item, 'corrected_amount', getattr(item, 'correct_amount', None)),
-                'New Price': getattr(item, 'new_price', None)
-            } for item in items
-        ]
+    transactions = Transaction.objects.all()
 
     # Prepare HTTP response object for CSV output
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="fifo_inventory_data.csv"'
+    response['Content-Disposition'] = 'attachment; filename="all_transactions_data.csv"'
+
+    # Specify the field names based on the Transaction model
+    fieldnames = [
+        'transaction_id', 
+        'is_in', 
+        'price', 
+        'transaction_block', 
+        'transaction_date', 
+        'transaction_amount'
+    ]
 
     # Create a CSV writer object and write the headers and data
-    writer = csv.DictWriter(response, fieldnames=[
-        'Input/Output Key', 'Transaction ID', 'Is In', 'Price', 'Transaction Block',
-        'Transaction Date', 'Transaction Amount', 'Corrected Amount/Correct Amount', 'New Price'
-    ])
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
 
-    # Prepare and write FIFO data
-    prepared_fifo_data = prepare_data(fifo_data)
-    for data in prepared_fifo_data:
-        writer.writerow(data)
+    # Serialize transaction data
+    for transaction in transactions:
+        transaction_data = {
+            'transaction_id': str(transaction.transaction_id),  # Convert UUID to string
+            'is_in': transaction.is_in,
+            'price': transaction.price,
+            'transaction_block': transaction.transaction_block,
+            'transaction_date': localtime(transaction.transaction_date).strftime('%Y-%m-%d %H:%M:%S') if transaction.transaction_date else None,
+            'transaction_amount': transaction.transaction_amount
+        }
+        writer.writerow(transaction_data)
 
     return response
 
