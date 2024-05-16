@@ -26,12 +26,12 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'run_my_sceduled_task_every_4_seconds': {
         'task': 'catalog.tasks.my_scheduled_task',
-        'schedule': 4.0,
-        'options': {'priority': 5}
+        'schedule': 30.0,
+        'options': {'priority': 6}
     }, 
     'update_cached_data_every_100_seconds': {
         'task': 'catalog.tasks.update_cached_data',
         'schedule': 100.0,
-        'options': {'priority':6 }
+        'options': {'priority': 5 }
     }
 }
