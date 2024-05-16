@@ -28,7 +28,7 @@ logger = logging.getLogger('catalog')
 
 
     
-@shared_task(bind=True, priority=3)
+@shared_task(bind=True)
 def my_scheduled_task(self):
 
     wallet_address = "5H6VnWCi8wDV5xfatGtAbjkqiCtGoet7euCQNJTVjkL4LQcM"
